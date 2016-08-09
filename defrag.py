@@ -227,10 +227,17 @@ if args.maledir:
 	corrMalesMedian = mean(maleCorMedian)
 
 else:
-	corrMalesMedian = 0.412516803449 # -> Illumina
-	# corrMalesMedian = 0.656779544997 # -> IonTorrent
-	percYMales= 0.00278246251169 # -> Illumina
-	# percYMales= 0.0014522834007 # -> IonTorrent
+	# Illumina (dflt)
+	# corrMalesMedian = 0.412516803449
+	# percYMales = 0.00278246251169
+	
+	# IonTorrent (dflt)
+	corrMalesMedian = 0.656779544997
+	percYMales = 0.0014522834007
+
+	# IonTorrent (Lyon)
+	
+	# percYMales = 0.0017770249718
 	
 	if args.scalingFactor:
 		corrMalesMedian = float(args.scalingFactor)
@@ -270,14 +277,17 @@ labelSize = 9
 plt.rc('font', **{'size':'8'})
 
 ax1.set_title("Training Set Gender Determination", fontsize=labelSize)
-#ax1.set_ylim(0.90 * (min(training))*100, 1.10 * (max(training))*100)
+#ax1.set_ylim(0.80 * (min(training))*100, 1.10 * (max(training))*100)
+ax1.set_xlim(-0.20,0.40)
 #ax1.set_ylim(0.95 * (min(training))*100, 0.05)
-ax1.set_ylim(0, 0.5)
+ax1.set_ylim(0.05, 0.25)
+
 ax1.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
 ax1.tick_params(labelsize=axislabels)
 for index,val in enumerate(training):
 	col = ['HotPink', 'Blue']
-	ax1.scatter(0, val*100, c=col[targets[index]])
+	#ax1.scatter(0, val*100, c=col[targets[index]])
+	ax1.scatter(float(targets[index])/5.0, val*100, c=col[targets[index]])
 	#print str(val) + str(targets[index])
 
 sortedList=testSamples.keys()
@@ -316,8 +326,10 @@ for index,testSample in enumerate(sortedList):
 	ax2.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
 	ax2.tick_params(labelsize=axislabels)
 	#ax2.set_ylim(0,0.05)
-	ax2.set_ylim(0,0.5)
-	ax2.scatter(0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
+	ax2.set_ylim(0.05,0.25)
+	ax2.set_xlim(-0.20,0.40)
+	#ax2.scatter(0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
+	ax2.scatter(float(prediction)/5.0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
 	
 	ax3.set_title("DEFRAG Script", fontsize=labelSize)
 	ax3.set_ylabel("Fetal Fraction (%) on subset of Y", fontsize=labelSize)	#Underestimation
@@ -337,7 +349,7 @@ for index,testSample in enumerate(sortedList):
 ax4.axvline(x=8000000, color='r')
 ax4.axvline(x=12000000, color='g')
 
-savefig(args.outputfig + ".png")
+savefig(args.outputfig + ".pdf")
 
 exit()
 
