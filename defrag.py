@@ -40,12 +40,13 @@ def getCoverage(sample):
 
 def getYPerc(sample):
 	return sum(sample[testChrom])/sum([sum(sample[chrom]) for chrom in sample])
-
+	
 
 def getYPercMean(sampleList):
 	values=[]
 	for sample in sampleList:
 		values.append(getYPerc(sampleList[sample]))
+		#print sample, getYPerc(sampleList[sample])
 	#print "Upper limit: " + str(max(values))
 	#print "Lower limit: " + str(min(values))
 	#return median(values)
@@ -98,32 +99,30 @@ parser = argparse.ArgumentParser(description='DEFRAG \
 	\t- Optional directory with male reference samples',
 	formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('boydir', type=str,
-					help='Directory containing fetal boy samples to be used as reference (.gcc and .pickle)')
-parser.add_argument('girldir', type=str,
-					help='Directory containing fetal girl samples to be used as reference (.gcc and .pickle)')
-parser.add_argument('--maledir', type=str,
-					help='Directory containing full male samples to be used as reference (.ggc and .pickle)')	
+parser.add_argument('boydir', type=str,help='Directory containing fetal boy samples to be used as reference (.gcc and .pickle)')
+parser.add_argument('girldir', type=str,help='Directory containing fetal girl samples to be used as reference (.gcc and .pickle)')
+parser.add_argument('--maledir', type=str,help='Directory containing full male samples to be used as reference (.ggc and .pickle)')	
 parser.add_argument('--scalingFactor', type=str, help='Factor that is used for correcting the calculated fetal fraction')	
 parser.add_argument('--percYonMales', type=str, help='Percentage of reads that is mapped on Y in males')
-parser.add_argument('testdir', type=str,
-					help='Directory containing test samples (gcc and pickle)')
+parser.add_argument('testdir', type=str,help='Directory containing test samples (gcc and pickle)')
 parser.add_argument('outputfig', type=str, default=default_fig, help='prefix of output figure (extension is added by script)')
 
 
 args = parser.parse_args()
 
 
-print '# Script information:'
-print '\n# Settings used:'
+print >> sys.stderr, '# Script information:'
+print >> sys.stderr, '\n# Settings used:'
 argsDict = args.__dict__
 argsKeys = argsDict.keys()
 argsKeys.sort()
 for arg in argsKeys:
-	print '\t'.join([arg,str(argsDict[arg])])
+	print >> sys.stderr, '\t'.join([arg,str(argsDict[arg])])
 
 
 ## Load the reference data
+
+testChrom = 'Y'
 
 print >> sys.stderr, '\n# Processing:'
 print >> sys.stderr, 'Loading reference samples'
@@ -131,25 +130,27 @@ boySamples	= dict()
 boySamplesPickle = dict()
 boyFiles = glob.glob(args.boydir + '/*.gcc')
 for boyFile in boyFiles:
-	print >> sys.stderr, '\tLoading boy gcc:\t' + boyFile
+	# print >> sys.stderr, '\tLoading boy gcc:\t' + boyFile
 	curFile = pickle.load(open(boyFile,'rb'))
 	boySamples[boyFile] = curFile
-	pic = os.path.splitext(boyFile)[0] + ".pickle"
-	print >> sys.stderr, '\tLoading boy pickle:\t' + pic
-	curFile = pickle.load(open(pic,'rb'))
-	boySamplesPickle[pic] = curFile
+	if len(curFile[testChrom]) > 1:
+		pic = os.path.splitext(boyFile)[0] + ".pickle"
+		# print >> sys.stderr, '\tLoading boy pickle:\t' + pic
+		curFile = pickle.load(open(pic,'rb'))
+		boySamplesPickle[pic] = curFile
 
 girlSamples	= dict()
 girlSamplesPickle = dict()
 girlFiles = glob.glob(args.girldir + '/*.gcc')
 for girlFile in girlFiles:
-	print >> sys.stderr, '\tLoading girl gcc:\t' + girlFile
+	# print >> sys.stderr, '\tLoading girl gcc:\t' + girlFile
 	curFile = pickle.load(open(girlFile,'rb'))
 	girlSamples[girlFile] = curFile
-	pic = os.path.splitext(girlFile)[0] + ".pickle"
-	print >> sys.stderr, '\tLoading girl pickle:\t' + pic
-	curFile = pickle.load(open(pic,'rb'))
-	girlSamplesPickle[pic] = curFile
+	if len(curFile[testChrom]) > 1:
+		pic = os.path.splitext(girlFile)[0] + ".pickle"
+		# print >> sys.stderr, '\tLoading girl pickle:\t' + pic
+		curFile = pickle.load(open(pic,'rb'))
+		girlSamplesPickle[pic] = curFile
 
 if args.maledir:	
 	print >> sys.stderr, 'Found directory with male reference samples.'	
@@ -157,18 +158,17 @@ if args.maledir:
 	maleSamplesPickle = dict()
 	maleFiles = glob.glob(args.maledir + '/*.gcc')
 	for maleFile in maleFiles:
-		print >> sys.stderr, '\tLoading man gcc:\t' + maleFile
+		# print >> sys.stderr, '\tLoading man gcc:\t' + maleFile
 		curFile = pickle.load(open(maleFile,'rb'))
 		maleSamples[maleFile] = curFile
-		pic = os.path.splitext(maleFile)[0] + ".pickle"
-		print >> sys.stderr, '\tLoading man pickle:\t' + pic
-		curFile = pickle.load(open(pic,'rb'))
-		maleSamplesPickle[pic] = curFile
+		if len(curFile[testChrom]) > 1:
+			pic = os.path.splitext(maleFile)[0] + ".pickle"
+			# print >> sys.stderr, '\tLoading man pickle:\t' + pic
+			curFile = pickle.load(open(pic,'rb'))
+			maleSamplesPickle[pic] = curFile
 
 
 ## Determine the subset of Y that is used in one of the fetal fraction determinations
-
-testChrom = 'Y'
 
 minLen = min([len(girlSamples[girlSample][testChrom]) for girlSample in girlSamples])
 girlData = []
@@ -197,19 +197,20 @@ print >> sys.stderr, keepers
 
 # Load the test data
 
-print >> sys.stderr, 'Loading test samples'
+#print >> sys.stderr, 'Loading test samples'
 testSamples	= dict()
 testSamplesPickle = dict()
 testFiles = glob.glob(args.testdir + '/*.gcc')
 for testFile in testFiles:
-	print >> sys.stderr, '\tLoading test gcc:\t' + testFile
+	# print >> sys.stderr, '\tLoading test gcc:\t' + testFile
 	samplename = os.path.splitext(testFile)[0]
 	curFile = pickle.load(open(testFile,'rb'))
-	testSamples[samplename] = curFile
-	pic = samplename + ".pickle"
-	print >> sys.stderr, '\tLoading test pickle:\t' + pic
-	curFile = pickle.load(open(pic,'rb'))
-	testSamplesPickle[samplename] = curFile
+	if len(curFile[testChrom]) > 1:
+		testSamples[samplename] = curFile
+		pic = samplename + ".pickle"
+		# print >> sys.stderr, '\tLoading test pickle:\t' + pic
+		curFile = pickle.load(open(pic,'rb'))
+		testSamplesPickle[samplename] = curFile
 
 	
 ## Determine the backgroud values used for correction of the whole chrY fetal fraction determination
@@ -224,9 +225,13 @@ if args.maledir:
 		corrMales=[maleSamples[male][testChrom][pos] for pos in keepers]
 		maleCorMedian.append(median(corrMales))
 	corrMalesMedian = mean(maleCorMedian)
+
 else:
-	corrMalesMedian = 0.412516803449
-	percYMales= 0.00278246251169
+	corrMalesMedian = 0.412516803449 # -> Illumina
+	# corrMalesMedian = 0.656779544997 # -> IonTorrent
+	percYMales= 0.00278246251169 # -> Illumina
+	# percYMales= 0.0014522834007 # -> IonTorrent
+	
 	if args.scalingFactor:
 		corrMalesMedian = float(args.scalingFactor)
 	if args.percYonMales:
@@ -234,7 +239,7 @@ else:
 print >> sys.stderr, 'percYMales:\t' + str(percYMales)
 print >> sys.stderr, 'corrMalesMedian:\t' + str(corrMalesMedian)
 
-## Build trainingset for gender determination
+# Build trainingset for gender determination
 
 training = getYPercGrand(girlSamplesPickle)[:]
 training.extend(getYPercGrand(boySamplesPickle)[:])
@@ -265,8 +270,9 @@ labelSize = 9
 plt.rc('font', **{'size':'8'})
 
 ax1.set_title("Training Set Gender Determination", fontsize=labelSize)
-#ax1.set_ylim(0.95 * (min(training))*100, 1.05 * (max(training))*100)
-ax1.set_ylim(0.95 * (min(training))*100, 0.05)
+#ax1.set_ylim(0.90 * (min(training))*100, 1.10 * (max(training))*100)
+#ax1.set_ylim(0.95 * (min(training))*100, 0.05)
+ax1.set_ylim(0, 0.5)
 ax1.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
 ax1.tick_params(labelsize=axislabels)
 for index,val in enumerate(training):
@@ -282,7 +288,8 @@ print "\t".join(headerLine)
 pdfData.append(headerLine)
 
 for index,testSample in enumerate(sortedList):
-	result=[testSamples[testSample][testChrom][pos] for pos in keepers]
+	# print >> sys.stderr, testSample
+	result=[testSamples[testSample][testChrom][pos] for pos in keepers]	
 	votesBoy=len([x for x in result if x != 0])
 	votesGirl=len([x for x in result if x == 0])
 	
@@ -308,14 +315,15 @@ for index,testSample in enumerate(sortedList):
 	ax2.set_title("Test Samples Gender Determination", fontsize=labelSize)
 	ax2.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
 	ax2.tick_params(labelsize=axislabels)
-	ax2.set_ylim(0,0.05)
+	#ax2.set_ylim(0,0.05)
+	ax2.set_ylim(0,0.5)
 	ax2.scatter(0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
 	
 	ax3.set_title("DEFRAG Script", fontsize=labelSize)
 	ax3.set_ylabel("Fetal Fraction (%) on subset of Y", fontsize=labelSize)	#Underestimation
 	ax3.set_xlabel("Fetal Fraction (%) on whole Y", fontsize=labelSize)
 	ax3.tick_params(labelsize=axislabels)
-	ax3.set_xlim(-5,50)
+	ax3.set_xlim(-5,100)
 	ax3.set_ylim(-5,50)
 	ax3.scatter(daphGender*100, median(result)/corrMalesMedian*100, c=color, marker='o')
 	
