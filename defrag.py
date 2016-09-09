@@ -227,17 +227,8 @@ if args.maledir:
 	corrMalesMedian = mean(maleCorMedian)
 
 else:
-	# Illumina (dflt)
-	# corrMalesMedian = 0.412516803449
-	# percYMales = 0.00278246251169
-	
-	# IonTorrent (dflt)
-	corrMalesMedian = 0.656779544997
-	percYMales = 0.0014522834007
-
-	# IonTorrent (Lyon)
-	
-	# percYMales = 0.0017770249718
+	corrMalesMedian = 0.412516803449
+	percYMales = 0.00278246251169
 	
 	if args.scalingFactor:
 		corrMalesMedian = float(args.scalingFactor)
@@ -271,24 +262,24 @@ print >> sys.stderr, "Testing classifier on trainingset.\nNumber of mislabeled p
 
 ## Start analyzing the test samples and create plots
 
-f, ((ax1,ax2),(ax3,ax4)) = subplots(nrows=2, ncols=2)
-axislabels = 8
-labelSize = 9
-plt.rc('font', **{'size':'8'})
+# f, ((ax1,ax2),(ax3,ax4)) = subplots(nrows=2, ncols=2)
+# axislabels = 8
+# labelSize = 9
+# plt.rc('font', **{'size':'8'})
 
-ax1.set_title("Training Set Gender Determination", fontsize=labelSize)
-#ax1.set_ylim(0.80 * (min(training))*100, 1.10 * (max(training))*100)
-ax1.set_xlim(-0.20,0.40)
-#ax1.set_ylim(0.95 * (min(training))*100, 0.05)
-ax1.set_ylim(0.05, 0.25)
+# ax1.set_title("Training Set Gender Determination", fontsize=labelSize)
+# ax1.set_ylim(0.80 * (min(training))*100, 1.10 * (max(training))*100)
+# ax1.set_xlim(-0.20,0.40)
+# ax1.set_ylim(0.95 * (min(training))*100, 0.05)
+# ax1.set_ylim(0.05, 0.25)
 
-ax1.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
-ax1.tick_params(labelsize=axislabels)
-for index,val in enumerate(training):
-	col = ['HotPink', 'Blue']
-	#ax1.scatter(0, val*100, c=col[targets[index]])
-	ax1.scatter(float(targets[index])/5.0, val*100, c=col[targets[index]])
-	#print str(val) + str(targets[index])
+# ax1.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
+# ax1.tick_params(labelsize=axislabels)
+# for index,val in enumerate(training):
+# 	col = ['HotPink', 'Blue']
+# 	ax1.scatter(0, val*100, c=col[targets[index]])
+# 	ax1.scatter(float(targets[index])/5.0, val*100, c=col[targets[index]])
+# 	print str(val) + str(targets[index])
 
 sortedList=testSamples.keys()
 sortedList.sort()
@@ -320,36 +311,36 @@ for index,testSample in enumerate(sortedList):
 	print "\t".join(lines)
 	pdfData.append(lines)
 	
-	color = getColor(getGender(prediction))
+	# color = getColor(getGender(prediction))
 			
-	ax2.set_title("Test Samples Gender Determination", fontsize=labelSize)
-	ax2.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
-	ax2.tick_params(labelsize=axislabels)
-	#ax2.set_ylim(0,0.05)
-	ax2.set_ylim(0.05,0.25)
-	ax2.set_xlim(-0.20,0.40)
-	#ax2.scatter(0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
-	ax2.scatter(float(prediction)/5.0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
+	# ax2.set_title("Test Samples Gender Determination", fontsize=labelSize)
+	# ax2.set_ylabel("% of reads on Y chromosome", fontsize=labelSize)
+	# ax2.tick_params(labelsize=axislabels)
+	# ax2.set_ylim(0,0.05)
+	# ax2.set_ylim(0.05,0.25)
+	# ax2.set_xlim(-0.20,0.40)
+	# ax2.scatter(0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
+	# ax2.scatter(float(prediction)/5.0, getYPerc(testSamplesPickle[testSample])*100, c=color, marker='o')
 	
-	ax3.set_title("DEFRAG Script", fontsize=labelSize)
-	ax3.set_ylabel("Fetal Fraction (%) on subset of Y", fontsize=labelSize)	#Underestimation
-	ax3.set_xlabel("Fetal Fraction (%) on whole Y", fontsize=labelSize)
-	ax3.tick_params(labelsize=axislabels)
-	ax3.set_xlim(-5,100)
-	ax3.set_ylim(-5,50)
-	ax3.scatter(daphGender*100, median(result)/corrMalesMedian*100, c=color, marker='o')
+	# ax3.set_title("DEFRAG Script", fontsize=labelSize)
+	# ax3.set_ylabel("Fetal Fraction (%) on subset of Y", fontsize=labelSize)	#Underestimation
+	# ax3.set_xlabel("Fetal Fraction (%) on whole Y", fontsize=labelSize)
+	# ax3.tick_params(labelsize=axislabels)
+	# ax3.set_xlim(-5,100)
+	# ax3.set_ylim(-5,50)
+	# ax3.scatter(daphGender*100, median(result)/corrMalesMedian*100, c=color, marker='o')
 	
-	ax4.set_title("Fetal Fraction (%) on whole chr Y vs. Coverage", fontsize=labelSize)
-	ax4.set_ylabel("Fetal Fraction (%) on whole chr Y", fontsize=labelSize)	#Underestimation
-	ax4.set_xlabel("Reads left after filtering", fontsize=labelSize)
-	ax4.tick_params(labelsize=axislabels)
-	#ax4.scatter(getCoverage(testSamplesPickle[testSample]), median(result)/corrMalesMedian*100, c=color, marker='o')
-	ax4.scatter(getCoverage(testSamplesPickle[testSample]), daphGender*100, c=color, marker='o')
+	# ax4.set_title("Fetal Fraction (%) on whole chr Y vs. Coverage", fontsize=labelSize)
+	# ax4.set_ylabel("Fetal Fraction (%) on whole chr Y", fontsize=labelSize)	#Underestimation
+	# ax4.set_xlabel("Reads left after filtering", fontsize=labelSize)
+	# ax4.tick_params(labelsize=axislabels)
+	# ax4.scatter(getCoverage(testSamplesPickle[testSample]), median(result)/corrMalesMedian*100, c=color, marker='o')
+	# ax4.scatter(getCoverage(testSamplesPickle[testSample]), daphGender*100, c=color, marker='o')
 
-ax4.axvline(x=8000000, color='r')
-ax4.axvline(x=12000000, color='g')
+# ax4.axvline(x=8000000, color='r')
+# ax4.axvline(x=12000000, color='g')
 
-savefig(args.outputfig + ".pdf")
+# savefig(args.outputfig + ".pdf")
 
 exit()
 
